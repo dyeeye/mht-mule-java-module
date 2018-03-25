@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="db153416-78ce-4ca6-8579-9b9703e9e458" basePath="/module/java" >
+		<http:listener-connection host="localhost" port="8091" />
+	</http:listener-config>
+	<flow name="generate-gender-flow" doc:id="e11a4feb-7053-447b-9b9a-3394dc7f9375" >
+		<http:listener doc:name="Listener" doc:id="ea92acf6-071d-4ed1-8372-64a7968407e6" config-ref="HTTP_Listener_config" path="/generate/gender" allowedMethods="GET"/>
+		<java:invoke-static doc:name="Generate Gender" doc:id="9c302b12-cb53-41af-a896-d5a5310c0b23" class="com.profitonline.generators.GenderGenerator" method="generate()"/>
+		<ee:transform doc:name="Transform Message" doc:id="05269305-d65b-4198-8c78-c345ad2b4707" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	value: payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="generate-number-flow" doc:id="33f0809c-3785-484f-9bab-5fdde98c9aa4" >
+		<http:listener doc:name="Listener" doc:id="652325fb-d806-4550-ae8f-166bb4fcf468" config-ref="HTTP_Listener_config" path="/generate/number" allowedMethods="GET"/>
+		<choice doc:name="Query params provided?" doc:id="598be4b2-4072-482d-848d-641ac6fea0a4" >
+			<when expression="#[attributes.queryParams.min? and attributes.queryParams.max?]" >
+				<java:invoke-static doc:name="Generate Restricted Number" doc:id="b99898ff-f45c-499f-8552-9118eb4494c6" class="com.profitonline.generators.NumberGenerator" method="generateVal(int, int)">
+					<java:args><![CDATA[#[{
+arg0:attributes.queryParams.min as Number,
+arg1: attributes.queryParams.max as Number
+}]]]></java:args>
+				</java:invoke-static>
+			</when>
+			<otherwise>
+				<java:invoke-static doc:name="Generate Number" doc:id="bab7e162-c9c8-437a-97e3-94ebc24b9f9b" class="com.profitonline.generators.NumberGenerator" method="generateVal()" />
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="45f4361b-04a5-4039-9cdb-b68416477b19" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	value: payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="clock-flow" doc:id="a8a43e6a-77cb-4b9d-ab2c-ff5f0cab8734" >
+		<http:listener doc:name="Listener" doc:id="88efab26-a783-400a-b1ad-f48394490fca" config-ref="HTTP_Listener_config" path="/generate/today" allowedMethods="GET"/>
+		<java:invoke-static doc:name="Today" doc:id="3a58c875-5fe0-42c1-8eee-46dc00226c19" class="java.time.LocalDate" method="now()"/>
+		<java:invoke-static doc:name="Formatter" doc:id="624375cc-89b6-46f9-8c6f-c04c4b24a483" class="java.time.format.DateTimeFormatter" method='ofPattern(String)' target="formatter">
+			<java:args ><![CDATA[#[{
+arg0: "MMMM dd, yyyy"
+}]]]></java:args>
+		</java:invoke-static>
+		<java:invoke doc:name="Format date" doc:id="2af2b5f6-1be7-4773-b097-dd16a13a367c" instance="#[payload]" class="java.time.LocalDate" method="format(DateTimeFormatter)">
+			<java:args ><![CDATA[#[{
+arg0: vars.formatter
+}]]]></java:args>
+		</java:invoke>
+	</flow>
+</mule>
