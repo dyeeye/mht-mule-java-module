@@ -11,8 +11,8 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	</http:listener-config>
 	<flow name="generate-gender-flow" doc:id="e11a4feb-7053-447b-9b9a-3394dc7f9375" >
 		<http:listener doc:name="Listener" doc:id="ea92acf6-071d-4ed1-8372-64a7968407e6" config-ref="HTTP_Listener_config" path="/generate/gender" allowedMethods="GET"/>
-		<java:invoke-static doc:name="Generate Gender" doc:id="9c302b12-cb53-41af-a896-d5a5310c0b23" class="com.profitonline.generators.GenderGenerator" method="generate()"/>
-		<ee:transform doc:name="Transform Message" doc:id="05269305-d65b-4198-8c78-c345ad2b4707" >
+		<java:invoke-static doc:name="Generate Gender" doc:id="9c302b12-cb53-41af-a896-d5a5310c0b23" class="com.ambassadorpatryk.generators.GenderGenerator" method="generate()"/>
+		<ee:transform doc:name="Gender" doc:id="05269305-d65b-4198-8c78-c345ad2b4707" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -27,7 +27,7 @@ output application/json
 		<http:listener doc:name="Listener" doc:id="652325fb-d806-4550-ae8f-166bb4fcf468" config-ref="HTTP_Listener_config" path="/generate/number" allowedMethods="GET"/>
 		<choice doc:name="Query params provided?" doc:id="598be4b2-4072-482d-848d-641ac6fea0a4" >
 			<when expression="#[attributes.queryParams.min? and attributes.queryParams.max?]" >
-				<java:invoke-static doc:name="Generate Restricted Number" doc:id="b99898ff-f45c-499f-8552-9118eb4494c6" class="com.profitonline.generators.NumberGenerator" method="generateVal(int, int)">
+				<java:invoke-static doc:name="Generate Restricted Number" doc:id="b99898ff-f45c-499f-8552-9118eb4494c6" class="com.ambassadorpatryk.generators.NumberGenerator" method="generateVal(int, int)">
 					<java:args><![CDATA[#[{
 arg0:attributes.queryParams.min as Number,
 arg1: attributes.queryParams.max as Number
@@ -35,7 +35,7 @@ arg1: attributes.queryParams.max as Number
 				</java:invoke-static>
 			</when>
 			<otherwise>
-				<java:invoke-static doc:name="Generate Number" doc:id="bab7e162-c9c8-437a-97e3-94ebc24b9f9b" class="com.profitonline.generators.NumberGenerator" method="generateVal()" />
+				<java:invoke-static doc:name="Generate Number" doc:id="bab7e162-c9c8-437a-97e3-94ebc24b9f9b" class="com.ambassadorpatryk.generators.NumberGenerator" method="generateVal()" />
 			</otherwise>
 		</choice>
 		<ee:transform doc:name="Transform Message" doc:id="45f4361b-04a5-4039-9cdb-b68416477b19" >

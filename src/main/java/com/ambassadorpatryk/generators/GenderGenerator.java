@@ -1,4 +1,4 @@
-package com.profitonline.generators;
+package com.ambassadorpatryk.generators;
 
 
 import java.util.Random;
